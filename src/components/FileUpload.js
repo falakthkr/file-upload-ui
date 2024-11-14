@@ -1,13 +1,18 @@
 "use client";
 
-import { CheckCircle, CloudUpload, UploadFile } from "@mui/icons-material";
+import {
+  CheckCircle,
+  CloudUpload,
+  Error,
+  UploadFile,
+} from "@mui/icons-material";
 import { useState, useRef } from "react";
 
 const FileUpload = () => {
   // States
   const [dragActive, setDragActive] = useState(false);
   const [files, setFiles] = useState([]);
-  const [stage, setStage] = useState("default");
+  const [stage, setStage] = useState("failed");
 
   // Refs
   const inputRef = useRef(null);
@@ -116,6 +121,24 @@ const FileUpload = () => {
                 // onClick={handleCancelUpload}
               >
                 New Upload
+              </span>
+            </div>
+          </div>
+        );
+      case "failed":
+        return (
+          <div className="outline-red-600 text-gray-900 rounded-lg outline p-5 text-center flex flex-col items-center justify-center">
+            <Error className="text-red-600 mb-2" />
+            <p className="font-semibold">Upload Failed</p>
+            <p className="text-sm text-gray-500 mb-2">
+              File type not compatible
+            </p>
+            <div className="flex">
+              <span
+                className="font-semibold cursor-pointer py-1 px-3 mt-1 rounded-full cursor-pointer bg-gray-200"
+                // onClick={handleCancelUpload}
+              >
+                Reupload
               </span>
             </div>
           </div>
