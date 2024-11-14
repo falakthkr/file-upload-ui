@@ -12,7 +12,7 @@ const FileUpload = () => {
   // States
   const [dragActive, setDragActive] = useState(false);
   const [files, setFiles] = useState([]);
-  const [stage, setStage] = useState("failed");
+  const [stage, setStage] = useState("default");
 
   // Refs
   const inputRef = useRef(null);
@@ -24,12 +24,7 @@ const FileUpload = () => {
     setTimeout(() => {
       setStage("success"); // using setTimeout to showcase loader functionality
     }, 5000);
-    if (e.target.files && e.target.files[0]) {
-      console.log(e.target.files);
-      for (let i = 0; i < e.target.files["length"]; i++) {
-        setFiles((prevState) => [...prevState, e.target.files[i]]);
-      }
-    }
+    setFiles((prevState) => [...prevState, e.target.files[0]]);
   };
 
   const handleDrop = (e) => {
@@ -66,6 +61,32 @@ const FileUpload = () => {
     inputRef.current.click();
   };
 
+  const getStatus = () => {
+    switch (stage) {
+      case "uploading":
+        return "Running";
+      case "success":
+        return "Done";
+      case "failed":
+        return "Failed";
+      case "default":
+        return "Running";
+    }
+  };
+
+  const getCurrentFiles = () => {
+    switch (stage) {
+      case "uploading":
+        return files.length - 1;
+      case "success":
+        return files.length;
+      case "failed":
+        return files.length - 1;
+      case "default":
+        return files.length - 1;
+    }
+  };
+
   // render functions
   const renderStages = () => {
     switch (stage) {
@@ -97,7 +118,10 @@ const FileUpload = () => {
             </p>
             <span
               className="font-semibold cursor-pointer py-1 px-3 mt-1 rounded-full cursor-pointer bg-gray-200"
-              // onClick={handleCancelUpload}
+              onClick={() => {
+                setStage("default");
+                setFiles([]);
+              }}
             >
               Cancel
             </span>
@@ -118,7 +142,7 @@ const FileUpload = () => {
               </span>
               <span
                 className="font-semibold cursor-pointer py-1 px-3 mt-1 rounded-full cursor-pointer bg-gray-200"
-                // onClick={handleCancelUpload}
+                onClick={() => setStage("default")}
               >
                 New Upload
               </span>
@@ -136,7 +160,7 @@ const FileUpload = () => {
             <div className="flex">
               <span
                 className="font-semibold cursor-pointer py-1 px-3 mt-1 rounded-full cursor-pointer bg-gray-200"
-                // onClick={handleCancelUpload}
+                onClick={() => setStage("default")}
               >
                 Reupload
               </span>
@@ -185,7 +209,11 @@ const FileUpload = () => {
           <UploadFile />
           <h2 className="text-lg font-bold">Sample File Name</h2>
         </div>
-        <p className="text-gray-500 text-sm mb-1">No file uploaded</p>
+        <p className="text-gray-500 text-sm mb-1">
+          {files.length > 0
+            ? `${getStatus()} • ${getCurrentFiles()}/${files.length}`
+            : "No file uploaded"}
+        </p>
         <div className={`${dragActive ? "bg-blue-100" : "bg-gray-100"}`}>
           {renderStages()}
         </div>
