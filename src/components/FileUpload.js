@@ -7,22 +7,33 @@ import {
   UploadFile,
 } from "@mui/icons-material";
 import { useState, useRef } from "react";
+import Snackbar from "@mui/material/Snackbar";
 
 const FileUpload = () => {
   // States
   const [dragActive, setDragActive] = useState(false);
   const [files, setFiles] = useState([]);
+  const [filesData, setFilesData] = useState([]);
   const [stage, setStage] = useState("default");
+  const [showAlert, setShowAlert] = useState(false);
 
   // Refs
   const inputRef = useRef(null);
 
   // Functions
   const handleFileUpload = (e) => {
+    let currentFileData = {
+      filename: e.target.files[0].name,
+      status: 0,
+    };
     setStage("uploading");
     e.preventDefault();
     setTimeout(() => {
       setStage("success"); // using setTimeout to showcase loader functionality
+      setFilesData((prevState) => [
+        ...prevState,
+        { ...currentFileData, status: 1 },
+      ]);
     }, 5000);
     setFiles((prevState) => [...prevState, e.target.files[0]]);
   };
@@ -61,6 +72,7 @@ const FileUpload = () => {
     inputRef.current.click();
   };
 
+  // find more efficient alt.
   const getStatus = () => {
     switch (stage) {
       case "uploading":
@@ -74,6 +86,7 @@ const FileUpload = () => {
     }
   };
 
+  // find more efficient alt.
   const getCurrentFiles = () => {
     switch (stage) {
       case "uploading":
@@ -87,7 +100,13 @@ const FileUpload = () => {
     }
   };
 
+  const handleAlertClose = () => {
+    setShowAlert(false);
+  };
+
   // render functions
+
+  // find more efficient alt.
   const renderStages = () => {
     switch (stage) {
       case "uploading":
@@ -100,15 +119,15 @@ const FileUpload = () => {
               viewBox="0 0 24 24"
             >
               <circle
-                class="opacity-25"
+                className="opacity-25"
                 cx="12"
                 cy="12"
                 r="10"
                 stroke="currentColor"
-                stroke-width="4"
+                strokeWidth="4"
               ></circle>
               <path
-                class="opacity-75"
+                className="opacity-75"
                 fill="blue"
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               ></path>
@@ -136,7 +155,10 @@ const FileUpload = () => {
             <div className="flex">
               <span
                 className="font-semibold cursor-pointer mr-5 py-1 px-3 mt-1 rounded-full cursor-pointer bg-gray-200"
-                // onClick={handleCancelUpload}
+                onClick={() => {
+                  navigator.clipboard.writeText(JSON.stringify(filesData));
+                  setShowAlert(true);
+                }}
               >
                 View Details
               </span>
@@ -185,7 +207,7 @@ const FileUpload = () => {
               type="file"
               onChange={handleFileUpload}
               ref={inputRef}
-              // accept=".xlsx,.xls,image/*,.doc, .docx,.ppt, .pptx,.txt,.pdf"
+              accept=".xlsx,.xls,image/*,.doc, .docx,.ppt, .pptx,.txt,.pdf"
             />
             <CloudUpload />
             <p className="text-gray-600 font-semibold">
@@ -200,6 +222,17 @@ const FileUpload = () => {
           </form>
         );
     }
+  };
+
+  const renderAlert = () => {
+    return (
+      <Snackbar
+        open={showAlert}
+        autoHideDuration={4000}
+        onClose={handleAlertClose}
+        message="Data copied to your clipboard"
+      />
+    );
   };
 
   return (
@@ -218,6 +251,7 @@ const FileUpload = () => {
           {renderStages()}
         </div>
       </div>
+      {renderAlert()}
     </div>
   );
 };
