@@ -9,10 +9,12 @@ import {
 import { useState, useRef } from "react";
 import Snackbar from "@mui/material/Snackbar";
 import { useRouter } from "next/navigation";
+import { useFiles } from "@/context/FilesContext";
 
 const FileUpload = () => {
   // Hooks
   const router = useRouter();
+  const { handleFileUpload, updateStatus } = useFiles();
 
   // States
   const [dragActive, setDragActive] = useState(false);
@@ -25,19 +27,22 @@ const FileUpload = () => {
   const inputRef = useRef(null);
 
   // Functions
-  const handleFileUpload = (e) => {
+  const handleUpload = (e) => {
+    e.preventDefault();
+    handleFileUpload(e);
     let currentFileData = {
       filename: e.target.files[0].name,
       status: 0,
     };
     setStage("uploading");
-    e.preventDefault();
     setTimeout(() => {
       setStage("success"); // using setTimeout to showcase loader functionality
       setFilesData((prevState) => [
         ...prevState,
         { ...currentFileData, status: 1 },
       ]);
+      updateStatus(e.target.files[0].name, 1);
+      // incase of a fail, maybe when using an API, the catch or else blow will call the updateStatus function with status as -1.
     }, 5000);
     setFiles((prevState) => [...prevState, e.target.files[0]]);
   };
@@ -174,7 +179,9 @@ const FileUpload = () => {
           <div className="outline-emerald-700 text-gray-900 rounded-lg outline p-5 text-center flex flex-col items-center justify-center">
             <CheckCircle className="text-emerald-700 mb-2" />
             <p className="font-semibold">Upload Complete</p>
-            <p className="text-sm text-gray-500 mb-2">{files[0]?.name}</p>
+            <p className="text-sm text-gray-500 mb-2">
+              {files[files.length - 1]?.name}
+            </p>
             <div className="flex">
               <span
                 className="font-semibold cursor-pointer mr-5 py-1 px-3 mt-1 rounded-full cursor-pointer bg-gray-200"
@@ -225,7 +232,7 @@ const FileUpload = () => {
               placeholder="inputFile"
               className="hidden"
               type="file"
-              onChange={handleFileUpload}
+              onChange={handleUpload}
               ref={inputRef}
               accept=".xlsx,.xls,image/*,.doc, .docx,.ppt, .pptx,.txt,.pdf"
             />
