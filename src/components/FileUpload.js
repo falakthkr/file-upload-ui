@@ -8,8 +8,12 @@ import {
 } from "@mui/icons-material";
 import { useState, useRef } from "react";
 import Snackbar from "@mui/material/Snackbar";
+import { useRouter } from "next/navigation";
 
 const FileUpload = () => {
+  // Hooks
+  const router = useRouter();
+
   // States
   const [dragActive, setDragActive] = useState(false);
   const [files, setFiles] = useState([]);
@@ -104,6 +108,28 @@ const FileUpload = () => {
     setShowAlert(false);
   };
 
+  const handleViewDetails = async () => {
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(filesData));
+      setShowAlert(true);
+      setTimeout(() => {
+        setFiles([]);
+        router.push("/"); // using setTimeout to delay redirect so that user can read alert before redirect
+      }, 3000);
+    } catch (err) {
+      console.log("Failed to copy data to clipboard:" + err);
+    }
+  };
+
+  const changeStatus = (status) => {
+    setStage(status);
+  };
+
+  const handleCancelFileUpload = () => {
+    changeStatus("default");
+    setFiles([]);
+  };
+
   // render functions
 
   // find more efficient alt.
@@ -137,10 +163,7 @@ const FileUpload = () => {
             </p>
             <span
               className="font-semibold cursor-pointer py-1 px-3 mt-1 rounded-full cursor-pointer bg-gray-200"
-              onClick={() => {
-                setStage("default");
-                setFiles([]);
-              }}
+              onClick={handleCancelFileUpload}
             >
               Cancel
             </span>
@@ -151,20 +174,17 @@ const FileUpload = () => {
           <div className="outline-emerald-700 text-gray-900 rounded-lg outline p-5 text-center flex flex-col items-center justify-center">
             <CheckCircle className="text-emerald-700 mb-2" />
             <p className="font-semibold">Upload Complete</p>
-            <p className="text-sm text-gray-500 mb-2">{files[0].name}</p>
+            <p className="text-sm text-gray-500 mb-2">{files[0]?.name}</p>
             <div className="flex">
               <span
                 className="font-semibold cursor-pointer mr-5 py-1 px-3 mt-1 rounded-full cursor-pointer bg-gray-200"
-                onClick={() => {
-                  navigator.clipboard.writeText(JSON.stringify(filesData));
-                  setShowAlert(true);
-                }}
+                onClick={handleViewDetails}
               >
                 View Details
               </span>
               <span
                 className="font-semibold cursor-pointer py-1 px-3 mt-1 rounded-full cursor-pointer bg-gray-200"
-                onClick={() => setStage("default")}
+                onClick={() => changeStatus("default")}
               >
                 New Upload
               </span>
@@ -182,7 +202,7 @@ const FileUpload = () => {
             <div className="flex">
               <span
                 className="font-semibold cursor-pointer py-1 px-3 mt-1 rounded-full cursor-pointer bg-gray-200"
-                onClick={() => setStage("default")}
+                onClick={() => changeStatus("default")}
               >
                 Reupload
               </span>
